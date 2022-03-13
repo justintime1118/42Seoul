@@ -6,7 +6,7 @@
 /*   By: jiyoo <jiyoo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/16 17:38:47 by jiyoo             #+#    #+#             */
-/*   Updated: 2022/03/08 20:34:13 by jiyoo            ###   ########.fr       */
+/*   Updated: 2022/03/11 21:16:38 by jiyoo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,15 +36,49 @@ t_var	*ft_init(char **argv)
 		|| vars->fork == 0 || vars->nb_of_eating == 0
 		|| vars->last_eating_time == 0)
 		ft_error("vars malloc failed");
+	ft_zeroinit(vars);
+	ft_simulation_init(vars);
 	return (vars);
 }
 
-int	ft_check_ovf(unsigned int nbr, unsigned int tmp)
+void	ft_simulation_init(t_var *vars)
 {
-	if (nbr < tmp)
-		return (1);
-	else
-		return (0);
+	unsigned int		i;
+	struct timeval		tmv;
+
+	i = 0;
+	while (i <= vars->nb_of_philos)
+	{
+		if (pthread_mutex_init(&(vars->mutex_id[i]), 0) != 0)
+			ft_error("mutex initiation failed");
+		i++;
+	}
+	if (gettimeofday(&tmv, NULL) == -1)
+		ft_error("timestamp error");
+	vars->begin_time = tmv.tv_sec * 1000 + tmv.tv_usec / 1000;
+	i = 1;
+	while (i <= vars->nb_of_philos)
+	{
+		if (pthread_create(&(vars->th_id[i]), 0, ft_routine, vars) != 0)
+			ft_error("philosopher creation failed");
+		i++;
+	}
+	if (pthread_create(&(vars->monitor_id), 0, ft_monitor, vars) != 0)
+		ft_error("monitor creation failed");
+}
+
+void	ft_zeroinit(t_var *vars)
+{
+	unsigned int	i;
+
+	i = 0;
+	while (i <= vars->nb_of_philos)
+	{
+		vars->fork[i] = 0;
+		vars->nb_of_eating[i] = 0;
+		vars->last_eating_time[i] = 0;
+		i++;
+	}
 }
 
 unsigned int	ft_atoi(char *str)
@@ -54,17 +88,17 @@ unsigned int	ft_atoi(char *str)
 
 	nbr = 0;
 	tmp = 0;
-	if (str == 0 || !*str || *str < '0' || '9' < *str)
-		ft_error("atoi parameter error");
+	if (str == 0 || *str == 0 || *str < '0' || '9' < *str)
+		ft_error("atoi wrong parameter");
 	while (*str)
 	{
 		if (*str < '0' || '9' < *str)
-			ft_error("atoi parameter error");
+			ft_error("atoi wrong parameter");
 		nbr *= 10;
 		nbr += *str - '0';
 		str++;
-		if (ft_check_ovf(nbr, tmp) == 1)
-			ft_error("atoi overflow error");
+		if (nbr < tmp)
+			ft_error("atoi overflow: too big argument");
 		tmp = nbr;
 	}
 	return (nbr);

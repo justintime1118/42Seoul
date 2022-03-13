@@ -6,7 +6,7 @@
 /*   By: jiyoo <jiyoo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/23 18:47:15 by jiyoo             #+#    #+#             */
-/*   Updated: 2022/03/10 17:20:29 by jiyoo            ###   ########.fr       */
+/*   Updated: 2022/03/11 16:56:50 by jiyoo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,15 +37,14 @@ typedef struct s_var
 }	t_var;
 
 t_var			*ft_init(char **argv);
-int				ft_check_ovf(unsigned int nbr, unsigned int tmp);
+void			ft_simulation_init(t_var *vars);
+void			ft_zeroinit(t_var *vars);
 unsigned int	ft_atoi(char *str);
 
 void			ft_eat(int philo_num, int former_philo_num, t_var *vars);
-void			ft_sleep(int philo_num, t_var *vars);
-void			*ft_routine(void *args);
-
-void			*ft_monitor(void *vars);
-void			*ft_simulation(void *vars);
+void			ft_sleep(int philo_num, t_var *vars, char flag);
+void			*ft_routine(void *arg);
+void			*ft_monitor(void *arg);
 
 void			ft_timestamp(int philo_num, char flag, t_var *vars);
 long			ft_gettime(t_var *vars);
